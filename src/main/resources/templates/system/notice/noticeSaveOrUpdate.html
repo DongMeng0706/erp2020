@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="/resources/layui/css/layui.css" media="all" />
+<script type="text/javascript" src="/resources/layui/layui.js"></script>
+<script type="text/javascript" src="/resources/js/common.js"></script>
+<body>
+<form class="layui-form layui-form-pane" action="store/updatestore" method="post" id="dataFrm" lay-filter="dataFrm">
+	<input id="id" name="id" type="hidden">
+	<div class="layui-form-item">
+		<label class="layui-form-label">公告标题:</label>
+		<div class="layui-input-block">
+			<input type="hidden" name="id">
+			<input type="text" name="title" id="title" lay-verify="required" autocomplete="off" placeholder="请输入公告标题" class="layui-input">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">公告内容:</label>
+		<div class="layui-input-block">
+			<textarea class="layui-textarea layui-hide" name="content"  lay-verify="content" id="content"></textarea>
+		</div>
+	</div>
+
+	<div class="layui-form-item" >
+		<div class="layui-input-block" align="center">
+			<button class="layui-btn" lay-submit="" lay-filter="saveOrAdd">保存</button>
+			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+		</div>
+	</div>
+</form>
+</body>
+<script type="text/javascript">
+    layui.use([ 'form', 'layer', 'table','upload','layedit' ], function() {
+        var table = layui.table, $ = layui.$, form = layui.form;
+        var layedit=layui.layedit;
+        var layer=layui.layer;
+
+        // 将富文本编辑器在打开弹出层之后再启用
+        var editIndex = layedit.build('content');
+        //清空富文本里面的内容
+        layedit.setContent(editIndex,"");
+        //编辑时候赋值
+        var urlParam = getParam('id');
+       // alert(urlParam)
+        if (!isEmpty(urlParam)) {
+            $.ajax({
+                url: "/notice/loadNoticeById",
+                data: {"id": urlParam},
+                type: "POST",
+                dataType: "json",
+                success: function (msg) {
+                    var json = msg.data;
+                    log(json);
+
+                    for (var key in json) {
+                        $("#" + key + "").val(json[key]);
+                    }
+                    layedit.setContent(editIndex,json.content);
+
+                }
+            });
+        }
+
+        //监听编辑或者添加
+        form.on('submit(saveOrAdd)', function(data){
+            // alert(urlParam)
+            layedit.sync(editIndex);
+
+            var url =  "";
+            var actionMsg = "";
+            if(urlParam==null || urlParam=="" || typeof(urlParam)=="undefined" ){
+                url="/notice/addNotice";
+                actionMsg = "新增发布";
+            }else{
+                url = "/notice/updateNotice";
+                actionMsg = "修改发布";
+            }
+            var params=$("#dataFrm").serialize();
+            console.log(params)
+            $.post(url,params,function(obj){
+                //if(obj.code==200){
+                   // $("#noticeTable").reload();//重载表格
+               // }
+                localStorage.setItem('code', obj.code);
+                var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                parent.layer.close(index); //再执行关闭
+               // layer.msg(actionMsg+'成功......', {icon: 6});
+                /*setTimeout(function () {
+                  //  window.parent.location.reload();
+
+                }, 1000);*/
+            })
+            return false;//阻止同步提交
+         /*   $.ajax({
+                url:url,
+                data: JSON.stringify(datas),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                success:function(msg){
+                    if(msg===1){
+                        layer.msg(actionMsg+'成功，正在跳转......', {icon: 6});
+                        //parent.layer.close(index);
+                        setTimeout(function () {
+                            window.parent.location.reload();
+                        }, 1000);
+
+                    }else{
+                        layer.msg(actionMsg+'失败', { icon: 5 });
+                    }
+                },
+                error:function(error){
+                    layer.msg('系统异常！请联系管理员', { icon: 5 });
+                }
+            });*/
+            return false;
+        });
+
+    });
+</script>
+</html>

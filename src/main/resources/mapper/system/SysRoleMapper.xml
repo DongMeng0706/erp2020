@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dong.system.mapper.RoleMapper">
+
+        <delete id="deleteRolePermissionByRoleid">
+          delete from sys_role_permission where rid=#{id}
+        </delete>
+
+        <delete id="deleteRolePermissionByPermissionid">
+            delete from  sys_role_permission where pid=#{id}
+        </delete>
+
+        <insert id="saveRolePermission" >
+            insert into sys_role_permission(rid,pid) values(#{rid},#{pid})
+        </insert>
+
+        <!--deleteUserRoleByUserId 根据用户ID 删除用户-角色中间关联表-->
+        <delete id="deleteUserRoleByUserId">
+            delete from sys_role_user where uid=#{value}
+        </delete>
+
+        <!-- deleteUserRoleByRoleId 根据角色ID删除用户-角色中间关联表-->
+        <delete id="deleteUserRoleByRoleId">
+            delete from sys_role_user where rid=#{value }
+        </delete>
+
+    <select id="selectRoleIdsByUserId" resultType="java.lang.Integer">
+		select rid from sys_role_user where uid=#{value}
+	</select>
+</mapper>
